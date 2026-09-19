@@ -1,39 +1,50 @@
 package cmdstash;
 
-import cmdstash.model.Snippet;
+import cmdstash.exception.InputClosedException;
+import cmdstash.exception.SnippetStorageException;
+import cmdstash.repository.SnippetRepository;
+import cmdstash.service.SnippetService;
+import cmdstash.service.TemplateCatalog;
+import cmdstash.ui.InputUtil;
+import cmdstash.ui.Menu;
+import cmdstash.ui.SnippetView;
 
+import java.util.Scanner;
+
+/**
+ * cmdstash の起動クラス。
+ * ここでは部品を組み立てて動かすだけにして、機能そのものは各クラスに任せる。
+ */
 public class Main {
 
-	public static void main(String[] args) {
-		//Snippet snippet = new Snippet(1, "Nginx再起動", "docker restart web-1", "docker", "よく忘れるやつ");
-		// 新規作成なので5引数版。0 / now / null を毎回手で書くと書き間違えるため
+    public static void main(String[] args) {
+        SnippetView view = new SnippetView();
 
-		SnippetService service = new SnippetService();
-		// Snippet の生成をservice任せにすることで、呼び出し側は「何を登録するか」だけ考えればよくするため
+        try (Scanner scanner = new Scanner(System.in)) {
+            SnippetRepository repository = new SnippetRepository();
+            SnippetService service = new SnippetService(repository);
+            TemplateCatalog templateCatalog = new TemplateCatalog();
+            InputUtil input = new InputUtil(scanner);
+            Menu menu = new Menu(service, templateCatalog, view, input);
+            // 部品を作って渡す組み立て作業をmainに集中させ、各クラスは自分の仕事だけに集中できるようにする
 
-		service.register("挨拶を表示するコード", "System.out.println(\"Hello\");");
-		// new Snippet(...) を直接書かず、service.register に文字列を渡すだけにするため
+            view.printWelcome(repository.getDataFilePath().toString(), service.countAll());
+            view.printBrokenLineWarning(repository.getBrokenLineCount(), repository.getDataFilePath().toString());
+            // 壊れた行は次の保存で消えるので、上書きされる前に気づけるよう起動直後に伝える
 
-		service.register("合計を求めるコード", "int sum = a + b;");
-		// 同じ書き方を繰り返すことで、登録方法が統一されていることを確認するため
+            view.printEmptyStateGuide(service.countAll());
 
-		service.register("繰り返し処理のコード", "for (int i = 0; i < 10; i++) {}");
-		// 3件登録しておき、findAll() で複数件まとめて取り出せることを見るため
-
-		// ✅ 修正後（1件目のSnippetを別変数で取り出す）
-		for (Snippet snippet : service.findAll()) {
-			System.out.println(snippet.getTitle() + " : " + snippet.getCommand());
-		}
-
-		Snippet firstSnippet = service.findAll().get(0);
-		// 動作確認用に、登録した1件目を取り出して使用回数の変化を見る
-
-		System.out.println(firstSnippet.getTitle() + " / " + firstSnippet.getCommand());
-		System.out.println("使用回数: " + firstSnippet.getUsageCount());
-
-		firstSnippet.recordUsage();
-
-		System.out.println("使用回数: " + firstSnippet.getUsageCount());
-
-	}
+            menu.run();
+        } catch (InputClosedException e) {
+            System.out.println();
+            System.out.println("入力が終了したため、cmdstash を終了します。");
+            // Ctrl+D などで入力が尽きたケース。異常ではないので、エラー扱いにせず静かに終わる
+        } catch (SnippetStorageException e) {
+            System.out.println();
+            System.out.println("【エラー】" + e.getMessage());
+            System.out.println("保存ファイルの場所と、書き込み権限を確認してください。");
+            // 保存まわりの失敗はユーザーにはどうにもできないので、原因と次の一手だけを短く伝えて終了する
+        }
+        // try-with-resources にして、どんな終わり方でもScannerが閉じられるようにする
+    }
 }
