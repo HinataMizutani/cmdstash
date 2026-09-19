@@ -1,10 +1,21 @@
 package cmdstash.exception;
 
+/**
+ * スニペットの保存・読み込みに失敗したことを表す独自例外。
+ * IOException のまま上に投げると「ファイルの話」が呼び出し側まで漏れてしまうため、
+ * アプリの言葉（スニペットの保存が失敗した）に翻訳して伝える。
+ */
 public class SnippetStorageException extends RuntimeException {
 
-	public SnippetStorageException(String message, Throwable cause) {
-		super(message, cause);
-		// ファイルの読み書き失敗はプログラムのバグではなく環境側の問題なので、
-		// 呼び出し元に毎回throwsを書かせない非チェック例外(RuntimeException)にした
-	}
+    /** 例外クラスに付ける決まりのバージョン番号。付けないとコンパイル時に警告が出る */
+    private static final long serialVersionUID = 1L;
+
+    public SnippetStorageException(String message, Throwable cause) {
+        // 元の例外（cause）も一緒に持たせて、原因を追えるようにする
+        super(message, cause);
+    }
+
+    public SnippetStorageException(String message) {
+        super(message);
+    }
 }
