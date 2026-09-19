@@ -52,7 +52,7 @@ public class Snippet {
 	 */
 	public boolean isNeverUsed() {
 		return lastUsedAt == null;
-		// // lastUsedAt が null かどうかを、外から気にしなくて済むようにする
+		// lastUsedAt が null かどうかを、外から気にしなくて済むようにする
 	}
 
 	public int getId() {
