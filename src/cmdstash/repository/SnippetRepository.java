@@ -84,7 +84,7 @@ public class SnippetRepository {
 	}
 
 	private Snippet parseLine(String line) {
-		String[] columns = line.split("\t");
+		String[] columns = line.split("\t", -1);
 		// タブで区切って各項目を取り出す
 
 		int id = Integer.parseInt(columns[0]);
