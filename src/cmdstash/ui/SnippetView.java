@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * スニペットを画面に表示するクラス。
- * 表示の書式をここに集めておくと、一覧・検索・レポートで見た目がバラバラになるのを防げる。
+ * 表示の書式をここに集めておくと、一覧・検索・レポートで見た目がバラバラになるのを防ぐ。
  */
 public class SnippetView {
 
@@ -122,7 +122,7 @@ public class SnippetView {
         } else {
             statusText = snippet.getDaysSinceLastUsed() + "日前が最後";
         }
-        // 未使用と「久しく使っていない」は意味が違うので、文言を分けて出す
+        // 未使用と「久しく使っていない」は、文言を分けて出す
 
         System.out.println("[" + snippet.getId() + "] " + snippet.getTitle() + "  (" + statusText + ")");
     }
