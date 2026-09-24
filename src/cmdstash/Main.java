@@ -13,7 +13,7 @@ import java.util.Scanner;
 
 /**
  * cmdstash の起動クラス。
- * ここでは部品を組み立てて動かすだけにして、機能そのものは各クラスに任せる。
+ * ここでは動かすだけにして、機能そのものは各クラスに任せる。
  */
 public class Main {
 
@@ -26,7 +26,7 @@ public class Main {
             TemplateCatalog templateCatalog = new TemplateCatalog();
             InputUtil input = new InputUtil(scanner);
             Menu menu = new Menu(service, templateCatalog, view, input);
-            // 部品を作って渡す組み立て作業をmainに集中させ、各クラスは自分の仕事だけに集中できるようにする
+            // 部品を作って渡す組み立て作業をmainに集中させ、各クラスは各クラスに集中できるようにする
 
             view.printWelcome(repository.getDataFilePath().toString(), service.countAll());
             view.printBrokenLineWarning(repository.getBrokenLineCount(), repository.getDataFilePath().toString());
@@ -38,12 +38,12 @@ public class Main {
         } catch (InputClosedException e) {
             System.out.println();
             System.out.println("入力が終了したため、cmdstash を終了します。");
-            // Ctrl+D などで入力が尽きたケース。異常ではないので、エラー扱いにせず静かに終わる
+            // Ctrl+D などで入力が尽きたケース。異常ではない、エラー扱いにせず静かに終わる
         } catch (SnippetStorageException e) {
             System.out.println();
             System.out.println("【エラー】" + e.getMessage());
             System.out.println("保存ファイルの場所と、書き込み権限を確認してください。");
-            // 保存まわりの失敗はユーザーにはどうにもできないので、原因と次の一手だけを短く伝えて終了する
+            // 保存まわりの失敗はユーザーにはどうにもできないので、原因と次の手順だけを短く伝えて終了する
         }
         // try-with-resources にして、どんな終わり方でもScannerが閉じられるようにする
     }
