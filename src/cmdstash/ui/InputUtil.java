@@ -10,14 +10,14 @@ import java.util.Scanner;
  */
 public class InputUtil {
 
-    /** タブは保存フォーマットの区切り文字なので、値としては受け付けない */
+    /** タブは保存フォーマットの区切り文字で、値としては受け付けない */
     private static final String FORBIDDEN_CHARACTER = "\t";
 
     private final Scanner scanner;
 
     public InputUtil(Scanner scanner) {
         this.scanner = scanner;
-        // Scannerを外から受け取る形にして、System.inを閉じるタイミングをMain側で一元管理する
+        // Scannerを外から受け取る形にして、Main側で一元管理する
     }
 
     /**
@@ -43,7 +43,7 @@ public class InputUtil {
     }
 
     /**
-     * 上限を決めずに整数を1つ受け取る。値が妥当かどうかの判断は呼び出し側に任せる。
+     * 上限を決めずに整数を1つ受け取る。
      */
     public int readNumber(String prompt) {
         while (true) {
@@ -56,7 +56,7 @@ public class InputUtil {
                 System.out.println("→ 数字を入力してください。");
             }
         }
-        // ID入力のように「上限が決まっていない／存在チェックが別に必要」な場面で使う
+        //「上限が決まっていない／存在チェックが別に必要」な場面で使う
     }
 
     /**
@@ -71,7 +71,7 @@ public class InputUtil {
                 System.out.println("→ 空欄にはできません。");
                 continue;
             }
-            // 問題があるケースを先に弾いて continue することで、ネストを深くしない
+            // 問題があるケースを先に弾くことで、ネストを深くしない
 
             if (input.length() > maxLength) {
                 System.out.println("→ " + maxLength + "文字以内で入力してください。");
@@ -119,7 +119,7 @@ public class InputUtil {
         if (input.isEmpty()) {
             return currentValue;
         }
-        // 「変更しない」を毎回打ち直させないための、CLIツールでよくある作法
+        // 「変更しない」を毎回打ち直させないため。
 
         return input;
     }
@@ -150,7 +150,7 @@ public class InputUtil {
         if (!scanner.hasNextLine()) {
             throw new InputClosedException("入力が終了しました。");
         }
-        // 先に残りがあるか確かめる。確かめずに読むと例外で落ちるか、聞き直しループが永久に回る
+        // 先に残りがあるか確かめる。確かめないと、聞き直しループが永久に回る
 
         return scanner.nextLine().trim();
     }
