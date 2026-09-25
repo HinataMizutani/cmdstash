@@ -11,8 +11,6 @@ import java.util.List;
 
 /**
  * スニペットに対する操作（登録・検索・並べ替えなど）をまとめたクラス。
- * 画面表示はせず、キーボード入力も受け取らない。ロジックだけをここに置くことで、
- * あとでWeb版を作るときもこのクラスをそのまま使い回せる。
  */
 public class SnippetService {
 
@@ -23,7 +21,7 @@ public class SnippetService {
     public SnippetService(SnippetRepository repository) {
         this.repository = repository;
         this.snippets = repository.loadAll();
-        // 起動時に一度だけ読み込み、以降はメモリ上のリストを正として扱う（毎回ファイルを読むと遅い）
+        // 起動時に一度だけ読み込み（毎回ファイルを読むと遅い）
 
         this.nextId = calculateNextId();
     }
@@ -41,7 +39,7 @@ public class SnippetService {
         }
 
         return maxId + 1;
-        // 件数+1にすると、途中を削除したときに既存IDとぶつかるのでこの方式にしている
+        // 件数+1にすると、途中を削除したときに既存IDとぶつかるのでこの方式に
     }
 
     public int countAll() {
@@ -59,7 +57,7 @@ public class SnippetService {
         }
 
         return false;
-        // 大文字小文字違いの重複も「同じもの」として扱いたいので equalsIgnoreCase を使う
+        // 大文字小文字も「同じもの」として扱いたいので equalsIgnoreCase を使う
     }
 
     /**
@@ -71,13 +69,13 @@ public class SnippetService {
         nextId++;
 
         saveOrRollback();
-        // 登録のたびに保存する。アプリが強制終了しても入力が消えないようにするため
+        // 登録のたびに保存。強制終了しても入力が消えないように
 
         return snippet;
     }
 
     /**
-     * 指定IDのスニペットの内容を書き換えて保存する。書き換えられたら true。
+     * 指定IDのスニペット内容を書き換えて保存。書き換えられたら true。
      */
     public boolean update(int id, String title, String command, String tag, String description) {
         Snippet target = findById(id);
@@ -90,7 +88,7 @@ public class SnippetService {
         target.setCommand(command);
         target.setTag(tag);
         target.setDescription(description);
-        // 書き換えはこのクラスの中だけで行う。画面側にSnippetを直接いじらせない
+        // 書き換えはこのクラスの中だけで。画面側にSnippetを直接いじらせたくない
 
         saveOrRollback();
 
@@ -101,10 +99,9 @@ public class SnippetService {
      * 保存する。失敗したらメモリ上の変更を捨て、ファイルの内容に戻してから例外を投げ直す。
      *
      * これが無いと「保存に失敗しました」と画面に出したのに、
-     * メモリ上のリストには変更が残ってしまう。
-     * その状態で次に別の操作をして保存が成功すると、
-     * 失敗したはずの変更まで一緒に書き込まれる ＝ 画面の表示が嘘になる。
-     * ファイルの内容を常に正しいものとみなし、書けなかったら読み直して足並みをそろえる。
+     * メモリ上のリストは変更されてしまう。
+     *  ＝ 画面の表示が嘘になる。
+     * ファイルの内容を常に正しいものにして、書けなかったら読み直して足並みをそろえる。
      */
     private void saveOrRollback() {
         try {
@@ -125,7 +122,7 @@ public class SnippetService {
             snippets.addAll(repository.loadAll());
             nextId = calculateNextId();
         } catch (SnippetStorageException reloadError) {
-            // 読み直しにも失敗したら打つ手がない。保存失敗のほうを伝えたいので、ここでは何もしない
+            // 読み直しに失敗したら詰みなので、保存失敗のほうを伝えて、ここでは何もしない
         }
     }
 
@@ -165,7 +162,7 @@ public class SnippetService {
     public void recordUsage(Snippet snippet) {
         snippet.recordUsage();
         saveOrRollback();
-        // 使用回数はランキングの元データなので、その場で保存して取りこぼさない
+        // 使用回数はランキングの元データなので、その場で保存
     }
 
     /**
@@ -173,11 +170,11 @@ public class SnippetService {
      */
     public List<Snippet> findAllSortedByUsage() {
         List<Snippet> sorted = new ArrayList<>(snippets);
-        // 元のリストを直接並べ替えると保存順まで変わってしまうので、コピーしてから並べ替える
+        // 元のリストを直接並べ替えると保存順まで変わるから、コピーしてから並べ替え
 
         sorted.sort(Comparator.comparingInt(Snippet::getUsageCount).reversed()
                 .thenComparing(Snippet::getTitle));
-        // 使用回数の多い順が主、同数のときは名前順にして表示位置が毎回ブレないようにする
+        // 使用回数の多い順が主、同数のときは名前順
 
         return sorted;
     }
@@ -193,7 +190,7 @@ public class SnippetService {
                 matched.add(snippet);
             }
         }
-        // 並べ替え済みのリストを回すことで、検索結果も自動的に「よく使う順」になる
+        // 並べ替え済みのリストを回して、検索結果も自動的に「よく使う順」に
 
         return matched;
     }
@@ -208,7 +205,7 @@ public class SnippetService {
             if (snippet.isNeverUsed()) {
                 continue;
             }
-            // 使用回数0のものがランキングに並んでも情報にならないので除外する
+            // 使用回数0のものは除外
 
             topUsed.add(snippet);
 
@@ -236,7 +233,7 @@ public class SnippetService {
                 stale.add(snippet);
             }
         }
-        // 「登録したまま忘れている」ものを可視化して、棚卸し（整理か使い直し）を促すのが狙い
+        // 「登録したまま忘れている」ものを可視化して、整理か使い直しを
 
         return stale;
     }
