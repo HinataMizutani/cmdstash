@@ -6,7 +6,6 @@ import java.time.temporal.ChronoUnit;
 
 /**
  * 登録した1件のコマンドスニペットを表すクラス。
- * データそのものだけを持ち、保存方法や画面表示のことは知らない（責務を1つに絞る）。
  */
 public class Snippet {
 
@@ -21,16 +20,16 @@ public class Snippet {
 
     /**
      * 新規登録用のコンストラクタ。
-     * 使用回数0・最終使用日時なし、という「新品の状態」をここで決め打ちする。
+     * 使用回数0・最終使用日時なし、をここで決め打ち。
      */
     public Snippet(int id, String title, String command, String tag, String description) {
-        // 登録直後の値が毎回同じなので、フル引数版に流し込んで初期化を1か所にまとめる（コンストラクタチェーン）
+        // 登録直後の値が毎回同じだから、初期化を1か所にまとめる（コンストラクタチェーン）
         this(id, title, command, tag, description, 0, LocalDateTime.now(), null);
     }
 
     /**
      * 復元用のコンストラクタ。
-     * ファイルから読み込むときは使用回数や日時も保存されているので、全項目を受け取る。
+     * ファイルから読み込むときは使用回数や日時、全項目を受け取る。
      */
     public Snippet(int id, String title, String command, String tag, String description,
                    int usageCount, LocalDateTime createdAt, LocalDateTime lastUsedAt) {
@@ -50,7 +49,7 @@ public class Snippet {
     public void recordUsage() {
         this.usageCount++;
         this.lastUsedAt = LocalDateTime.now();
-        // 「回数を増やす」と「日時を更新する」は必ずセットなので、外から別々に触らせずメソッドにまとめる
+        // 「回数を増やす」と「日時を更新する」は必ずセット、メソッドにまとめる
     }
 
     /**
@@ -58,23 +57,23 @@ public class Snippet {
      */
     public boolean isNeverUsed() {
         return lastUsedAt == null;
-        // 判定条件（nullかどうか）を外に漏らさず、意味のある名前で聞けるようにする
+        // nullかどうかを、意味のある名前で聞けるように
     }
 
     /**
-     * 最後に使ってから何日経ったかを返す。未使用の場合は -1 を返す。
+     * 最後に使ってから何日経ったか。未使用の場合は -1。
      */
     public long getDaysSinceLastUsed() {
         if (isNeverUsed()) {
             return -1;
         }
-        // 「未使用」を先に返して抜けることで、この下をネストさせずに書ける（早期return）
+        // 「未使用」を先に返して抜けて、この下をネストさせない（早期return）
 
         LocalDate lastUsedDate = lastUsedAt.toLocalDate();
         LocalDate today = LocalDate.now();
 
         return ChronoUnit.DAYS.between(lastUsedDate, today);
-        // 時刻まで含めて引くと「昨日の23時 → 今日の0時」が0日になってしまうので、日付だけで比べる
+        // 時刻まで含めて引くと面倒なので、日付だけで比べる
     }
 
     /**
@@ -88,7 +87,7 @@ public class Snippet {
                 || command.toLowerCase().contains(lowerKeyword)
                 || tag.toLowerCase().contains(lowerKeyword)
                 || description.toLowerCase().contains(lowerKeyword);
-        // 検索対象の項目をこのクラス自身が知っているので、判定もここに置く
+        // 検索対象の判定もここに
     }
 
     public int getId() {
