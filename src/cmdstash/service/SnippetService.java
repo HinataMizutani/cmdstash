@@ -10,7 +10,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * スニペットに対する操作（登録・検索・並べ替えなど）をまとめたクラス。
+ * スニペットに対する操作をまとめたクラス。
  */
 public class SnippetService {
 
@@ -27,7 +27,7 @@ public class SnippetService {
     }
 
     /**
-     * 次に振るIDを決める。既存の最大ID + 1 にすることで、削除後も番号が衝突しない。
+     * 既存の最大ID + 1 で、削除後も番号衝突なし。
      */
     private int calculateNextId() {
         int maxId = 0;
