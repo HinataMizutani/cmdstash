@@ -46,9 +46,7 @@ public class SnippetRepository {
     }
 
     /**
-     * ファイルから全スニペットを読み込む。ファイルがまだ無ければ空のリストを返す。
-     */
-    /**
+     * ファイルから全スニペットを読み込む。ファイルがまだ無ければ空のリストを返して、
      * 前回の読み込みで捨てた行数を返す。
      */
     public int getBrokenLineCount() {
@@ -68,10 +66,10 @@ public class SnippetRepository {
         List<String> lines;
         try {
             lines = Files.readAllLines(dataFilePath, StandardCharsets.UTF_8);
-            // 日本語のメモを書ける必要があるので、文字コードはUTF-8で固定する
+            // 日本語のメモを書ける必要があるので、文字コードはUTF-8で固定
         } catch (IOException e) {
             throw new SnippetStorageException("スニペットの読み込みに失敗しました: " + dataFilePath, e);
-            // IOExceptionのまま投げず、アプリの言葉に翻訳した独自例外に包み直す
+            // IOExceptionのまま投げず、わかりやすい言葉にした独自例外に直す
         }
 
         for (String line : lines) {
@@ -86,25 +84,25 @@ public class SnippetRepository {
             if (!line.trim().isEmpty()) {
                 brokenLineCount++;
             }
-            // ただし黙って捨てると次の保存で完全に消える。空行以外は数えておき、起動時に警告する
+            // ただ黙って捨てると次の保存で完全に消える。空行以外は数えて起動時に警告する
         }
 
         return snippets;
     }
 
     /**
-     * 渡されたリストの内容でファイルを丸ごと書き直す。
+     * 渡されたリストの内容でファイルを丸ごと書き直し。
      */
     public void saveAll(List<Snippet> snippets) {
         try {
             Files.createDirectories(dataFilePath.getParent());
-            // 保存先フォルダが無いと書き込みで落ちるので、書く前に必ず作っておく
+            // 保存先フォルダが無いと書き込みで落ちるので、書く前に必ず作る
         } catch (IOException e) {
             throw new SnippetStorageException("保存先フォルダを作成できませんでした: " + dataFilePath.getParent(), e);
         }
 
         Path tempPath = dataFilePath.resolveSibling(dataFilePath.getFileName() + AppConst.TEMP_FILE_SUFFIX);
-        // 本番のファイルにいきなり書かず、まず隣に「書きかけファイル」を作る（理由は下のコメント）
+        // 本番のファイルにいきなり書かず、まず隣に「書きかけファイル」を作る
 
         try (BufferedWriter writer = Files.newBufferedWriter(tempPath, StandardCharsets.UTF_8)) {
             for (Snippet snippet : snippets) {
@@ -114,7 +112,7 @@ public class SnippetRepository {
         } catch (IOException e) {
             throw new SnippetStorageException("スニペットの保存に失敗しました: " + dataFilePath, e);
         }
-        // try-with-resources にして、例外が出てもファイルが閉じられるようにする
+        // 例外が出てもファイルが閉じられるようにする
 
         try {
             Files.move(tempPath, dataFilePath, StandardCopyOption.REPLACE_EXISTING);
@@ -122,8 +120,7 @@ public class SnippetRepository {
             throw new SnippetStorageException("保存ファイルの差し替えに失敗しました: " + dataFilePath, e);
         }
         // 書き終わってから一気に置き換える。
-        // 毎回ファイルを全部書き直す方式なので、直接上書き中に強制終了されると全データが消える。
-        // 「別ファイルに書き切ってから名前を付け替える」ことで、失敗しても元のファイルが無傷で残る。
+        // 「別ファイルに書き切ってから名前を付け替える」ことで、失敗しても元のファイルが無傷で残るように。
     }
 
     /**
@@ -135,7 +132,7 @@ public class SnippetRepository {
         if (!snippet.isNeverUsed()) {
             lastUsedText = snippet.getLastUsedAt().format(DATE_TIME_FORMAT);
         }
-        // 未使用（null）はそのままだと "null" という文字列になってしまうので、専用の記号に置き換える
+        // 未使用（null）はそのままだと "null" という文字列になってしまうので、専用の記号に置き換え
 
         return snippet.getId()
                 + AppConst.FIELD_SEPARATOR + snippet.getTitle()
@@ -148,18 +145,17 @@ public class SnippetRepository {
     }
 
     /**
-     * タブ区切りの1行をスニペットに戻す。復元できない行は null を返す。
+     * タブ区切りの1行をスニペットに戻す。復元できない行は null 
      */
     private Snippet parseLine(String line) {
         if (line.trim().isEmpty()) {
             return null;
         }
-        // 末尾の空行などをそのまま解析すると落ちるので、先に弾いておく
+        // 末尾の空行などをそのまま解析すると落ちるので、先に弾く
 
         String[] fields = line.split(AppConst.FIELD_SEPARATOR, -1);
-        // 区切り文字が連続しても項目数を減らさないため、limitに-1を指定する。
-        // 注意：splitの第1引数は正規表現として解釈される。タブは正規表現でもそのままの意味なので今は問題ないが、
-        // 区切り文字を "|" などに変えると正規表現の記号とぶつかって壊れる。変更するときはここも見直すこと
+        // 区切り文字が連続しても項目数を減らさないために、limitに-1を指定する。
+        // 区切り文字を "|" などに変えると正規表現の記号とぶつかるから、変更するときはここも見直し大切
 
         if (fields.length != AppConst.FIELD_COUNT) {
             return null;
@@ -183,7 +179,7 @@ public class SnippetRepository {
             return new Snippet(id, title, command, tag, description, usageCount, createdAt, lastUsedAt);
         } catch (RuntimeException e) {
             return null;
-            // 数値や日時が壊れている行は復元をあきらめる。アプリ全体を止めないための判断
+            // 数値や日時が壊れている行は復元をあきらめ。
         }
     }
 }
