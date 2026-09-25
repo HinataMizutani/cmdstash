@@ -16,12 +16,10 @@ import java.util.Map;
 
 /**
  * メニューを表示し、選ばれた機能を呼び出すクラス。
- * 「入力を受け取る → サービスに頼む → 表示クラスに出してもらう」の橋渡しだけを担当し、
- * 計算や保存のロジックは持たず、画面への出力も自分では行わない。
  */
 public class Menu {
 
-    /** 一覧などで「やめる」を選ぶための番号。IDは1から振るので0とぶつからない */
+    /** 一覧などで「やめる」を選ぶための番号。 */
     private static final int CANCEL_NUMBER = 0;
 
     private final SnippetService service;
@@ -34,7 +32,7 @@ public class Menu {
         this.templateCatalog = templateCatalog;
         this.view = view;
         this.input = input;
-        // 必要な部品を外から受け取る形にして、このクラス自身がnewしないようにする（差し替えやすくなる）
+        // このクラス自身がnewしないように。（差し替えやすくなる）
     }
 
     /**
@@ -50,7 +48,7 @@ public class Menu {
                     "番号を選んでください > ", MenuConst.MIN_NUMBER, MenuConst.MAX_NUMBER);
 
             isRunning = executeSelected(selected);
-            // ループ継続の判断を戻り値1つに集約し、whileの条件をシンプルに保つ
+            // whileの条件をシンプルに
         }
 
         view.printMessage("cmdstash を終了しました。また使ってください。");
@@ -69,7 +67,7 @@ public class Menu {
             return true;
         }
         // 保存に1回失敗しただけでアプリごと終わると、他の登録内容も見られなくなる。
-        // 起動時の読み込み失敗（Mainで処理）と違い、実行中の保存失敗は伝えて続行するのが親切。
+        // 実行中の保存失敗は伝えて続行するのが親切...
     }
 
     private boolean dispatch(int selected) {
@@ -106,7 +104,7 @@ public class Menu {
         }
 
         return true;
-        // 入力範囲は readNumberInRange で保証済みだが、将来メニューを増やしたときの保険として default を残す
+        // 将来メニューを増やしたときの保険として default
     }
 
     /**
@@ -232,7 +230,7 @@ public class Menu {
             String value = input.readRequiredText("  " + name + " > ", AppConst.MAX_PLACEHOLDER_VALUE_LENGTH);
             values.put(name, value);
         }
-        // 聞いた順番を保ちたいのでLinkedHashMapを使う（HashMapだと順序が保証されない）
+        // 聞いた順番を保ちたいのでLinkedHashMapを使う
 
         return PlaceholderUtil.fill(snippet.getCommand(), values);
     }
@@ -256,7 +254,6 @@ public class Menu {
         String newDescription =
                 input.readTextOrKeepCurrent("メモ", target.getDescription(), AppConst.MAX_DESCRIPTION_LENGTH);
         // 入力を先に全部そろえてから、書き換えはサービスに1回で任せる。
-        // 画面側がSnippetを直接書き換えると、保存に失敗したときに元へ戻す手立てが無くなる
 
         service.update(target.getId(), newTitle, newCommand, newTag, newDescription);
 
@@ -267,7 +264,7 @@ public class Menu {
     }
 
     /**
-     * 編集時のタイトル入力。空Enterなら今のまま、変更するなら重複チェックを通す。
+     * 編集時のタイトル入力。空Enterなら今のまま、変更するなら重複チェックを。
      */
     private String readEditedTitle(String currentTitle) {
         while (true) {
@@ -277,14 +274,14 @@ public class Menu {
             if (newTitle.isEmpty() || newTitle.equalsIgnoreCase(currentTitle)) {
                 return currentTitle;
             }
-            // 空Enterはもちろん、今と同じ名前を打たれた場合も「変更なし」として通す
+            // 空Enterはもちろん、今と同じ名前を打たれた場合も「変更なし」
 
             if (!service.existsSameTitle(newTitle)) {
                 return newTitle;
             }
 
             view.printMessage("→ 同じタイトルが既にあります。別の名前にしてください。");
-            // 登録時だけ重複を防いでも、編集で同じ名前にできてしまっては意味がない。
+            // 編集で同じ名前にできると意味がない。
             // 聞き直しは空Enterで抜けられるようにして、行き止まりを作らない
         }
     }
@@ -308,7 +305,7 @@ public class Menu {
             view.printMessage("削除をやめました。");
             return;
         }
-        // 取り消せない操作なので、実行前に必ず確認をはさむ
+        // 取り消せない操作なので、実行前に必ず確認を
 
         service.deleteById(target.getId());
         view.printMessage("削除しました。");
@@ -359,7 +356,7 @@ public class Menu {
         }
 
         view.printMessage("  → 使わないものは削除、使えるものは思い出して使うと一覧が軽くなります。");
-        // 「増える一方で探しにくくなる」というこの手のツールの弱点に、正面から対処するための機能
+        // この手のツールの弱点に、正面から対処するための機能
     }
 
     /**
@@ -426,13 +423,13 @@ public class Menu {
             service.register(selected.getTitle(), selected.getCommand(),
                     selected.getTag(), selected.getDescription());
             view.printMessage("→ 「" + selected.getTitle() + "」を追加しました。");
-            // 1件ごとに結果を返すことで、続けて選ぶかどうかを判断できるようにする
+            // 1件ごとに結果を返すことで、続けて選ぶかどうかを判断できるように
         }
     }
 
     /**
-     * 一覧を出して、対象のスニペットを1件選んでもらう。
-     * キャンセルされた場合や1件も無い場合は null を返す。
+     * 一覧を出して、対象のスニペットを1件選んで、
+     * キャンセルされた場合や1件も無い場合は null を
      */
     private Snippet selectSnippet() {
         if (service.countAll() == 0) {
@@ -445,7 +442,7 @@ public class Menu {
 
         while (true) {
             int id = input.readNumber("IDを入力（" + CANCEL_NUMBER + "でキャンセル） > ");
-            // IDは削除で歯抜けになるため「1〜N」の範囲チェックが成り立たない。範囲ではなく存在で確かめる
+            // IDは削除で歯抜けになるため、範囲ではなく存在で確かめる
 
             if (id == CANCEL_NUMBER) {
                 return null;
