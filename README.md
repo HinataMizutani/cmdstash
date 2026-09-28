@@ -56,8 +56,8 @@ Eclipse で `src` をソースフォルダにして、`cmdstash.Main` を実行�
 実行したフォルダに `snippets.txt` ができます。タブ区切りです。
 
 ```
-1	コンテナに入る	docker exec -it {{コンテナ名}} bash	docker	よく忘れる
-2	ポート確認	lsof -i :8080	network	
+1	ブランチを作る git checkout -b {{ブランチ名}}	よく忘れる
+2	開発サーバー起動 python manage.py runserver
 ```
 
 カンマ区切りにするとコマンドの中のカンマとぶつかるので、タブにしました。
@@ -74,11 +74,11 @@ Eclipse で `src` をソースフォルダにして、`cmdstash.Main` を実行�
 - ファイル入出力（BufferedReader、BufferedWriter）
 - クリップボード（Toolkit、StringSelection）
 
-ファイル入出力とクリップボードは授業でまだやっていないので、下の「調べて使ったところ」に参考にしたページを書いています。
+ファイル入出力とクリップボードは授業でまだやっていないので、似たCLIアプリケーションと、下の「調べて使ったところ」に参考にしたページを書いています。
 
 ## 調べて使ったところ
 
-授業でまだやっていない部分は、公式のAPI仕様を見ながら書きました。
+授業でまだやっていない部分は、公式のAPI仕様を見ながら、似たCLIアプリケーションを参考に書きました。
 
 ### ファイルの読み書き（SnippetFile）
 
@@ -88,7 +88,7 @@ Eclipse で `src` をソースフォルダにして、`cmdstash.Main` を実行�
 - [BufferedWriter (Java SE 21)](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/BufferedWriter.html) — `write()` と `newLine()` で1行ずつ書く
 - [String.split (Java SE 21)](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html#split(java.lang.String,int)) — 第2引数に `-1` を入れると末尾の空文字が消えない
 
-`try-with-resources` は授業（第16章）でやった書き方をそのまま使っています。
+`try-with-resources` は授業でやった書き方をそのまま使っています。
 
 ### クリップボードへのコピー（Menu）
 
